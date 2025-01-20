@@ -2,14 +2,26 @@
 ;;; ndisasm boot.bin
 ;;; qemu-system-x86_64 -drive file=boot.bin,format=raw
 
-    ORG 0x7C00                  ; this is where BIOS copies bootloader to the RAM
+    ORG 0x0
     BITS 16                     ; real mode is 16 bit, this is the initial operating mode
 
+    jmp 0x7C0:start             ; this sets code segment
+
 start:
+    cli                         ; clear interrupts
+    mov ax, 0x7C0               ; 0x7C00 is where BIOS should copy the bootloader to the RAM
+    mov ds, ax                  ; data segment
+    mov es, ax                  ; extra segment
+    mov ax, 0x00
+    mov ss, ax                  ; stack segment
+    mov sp, 0x7C00              ; stack pointer (it grows downwards)
+    sti                         ; enable interrupts
     mov si, string              ; store address of the string inside si
 
 print_loop:
-    lodsb                       ; load byte at ds:si into al and increment si
+    lodsb                       ; load byte at DS:SI (data segment, si register is the offset) into al and increment si
+                                ; DS * 16 + SI = 0x7C0 * 16 + SI = 0x7C00 + SI
+
     cmp al, 0                   ; check if end of string
     je done
 
