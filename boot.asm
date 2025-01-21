@@ -1,9 +1,16 @@
     ORG 0x0
     BITS 16                     ; real mode is 16 bit, this is the initial operating mode
 
-    jmp 0x7C0:start             ; this sets code segment
+_start:
+    jmp short start
+    nop
+
+    times 33 db 0               ; create 33 bytes, this is for BIOS Parameter Block
 
 start:
+    jmp 0x7C0:step2             ; set code segment to 0x7C0 and jump to step2 label
+
+step2:
     cli                         ; clear interrupts
     mov ax, 0x7C0               ; 0x7C00 is where BIOS should copy the bootloader to the RAM
     mov ds, ax                  ; data segment
