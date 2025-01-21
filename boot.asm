@@ -1,7 +1,3 @@
-;;; nasm -f bin boot.asm -o boot.bin
-;;; ndisasm boot.bin
-;;; qemu-system-x86_64 -drive file=boot.bin,format=raw
-
     ORG 0x0
     BITS 16                     ; real mode is 16 bit, this is the initial operating mode
 
