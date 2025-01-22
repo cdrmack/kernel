@@ -17,6 +17,13 @@ handle_zero:                    ; custom interrupt 0 (divide by 0)
     int 0x10                    ; call BIOS interrupt
     iret                        ; return from the interrupt
 
+handle_one:                     ; custom interrupt 1
+    mov ah, 0xE
+    mov al, '1'
+    mov bx, 0x0
+    int 0x10
+    iret
+
 step2:
     cli                         ; clear interrupts
     mov ax, 0x7C0               ; 0x7C00 is where BIOS should copy the bootloader to the RAM
@@ -28,15 +35,19 @@ step2:
     sti                         ; enable interrupts
 
     cli
-    mov word[ss:0x00], handle_zero   ; override first byte (interrupt zero) in the interrupts vector
+    mov word[ss:0x00], handle_zero   ; override first byte (interrupt zero) in the interrupts vector table
                                      ; we use ss which is 0x0 because [0x0] (without segment specified) would use ds by default which is 0x7C0
     mov ax, cs                  ; store code segment
     mov word[ss:0x02], ax       ; set segment of the interrupt handler
+
+    mov word[ss:0x04], handle_one
+    mov word[ss:0x06], ax
     sti
 
-    mov ax, 0x0
-    div ax                      ; divide by 0, will trigger interrupt 0
+    ;; mov ax, 0x0
+    ;; div ax                      ; divide by 0, will trigger interrupt 0
     ;; int 0                            ; call interrupt zero directly
+    int 1
 
     mov si, string              ; store address of the string inside si
 
